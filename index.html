@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CRUD de Productos</title>
+</head>
+<body>
+    <h1>CRUD de Productos</h1>
+
+    <!-- Formulario para agregar un producto -->
+    <h2>Agregar Producto</h2>
+    <form id="addProductForm">
+        <label for="nombre">Nombre:</label>
+        <input type="text" id="nombre" name="nombre" required><br>
+        <label for="descripcion">Descripción:</label>
+        <input type="text" id="descripcion" name="descripcion" required><br>
+        <button type="submit">Agregar Producto</button>
+    </form>
+
+    <!-- Lista de productos -->
+    <h2>Lista de Productos</h2>
+    <ul id="productList"></ul>
+
+    <!-- Script para interactuar con el servidor -->
+    <script>
+        const form = document.getElementById('addProductForm');
+        const productList = document.getElementById('productList');
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const nombre = form.nombre.value;
+            const descripcion = form.descripcion.value;
+            try {
+                const response = await fetch('/products', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ nombre, descripcion })
+                });
+                const result = await response.json();
+                console.log(result);
+                // Recargar la lista de productos después de agregar uno nuevo
+                fetchProductList();
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        });
+
+        // Función para cargar la lista de productos desde el servidor
+        async function fetchProductList() {
+            try {
+                const response = await fetch('/products');
+                const productListData = await response.json();
+                productList.innerHTML = ''; // Limpiar la lista antes de agregar elementos
+                productListData.forEach(product => {
+                    const li = document.createElement('li');
+                    li.textContent = `ID: ${product.id}, Nombre: ${product.nombre}, Descripción: ${product.descripcion}`;
+                    productList.appendChild(li);
+                });
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        }
+
+        // Cargar la lista de productos al cargar la página
+        fetchProductList();
+    </script>
+</body>
+</html>
